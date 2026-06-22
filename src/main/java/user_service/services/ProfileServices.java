@@ -1,17 +1,14 @@
 package user_service.services;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import user_service.DTO.ProfileResponse;
-import user_service.DTO.UpdateProfileResponse;
 import user_service.DTO.UserRequest;
 import user_service.DTO.UserUpdateRequest;
 import user_service.models.User;
 import user_service.repos.UserRepo;
 
 import java.util.Optional;
-import java.util.UUID;
 
 
 @Service
@@ -19,8 +16,8 @@ import java.util.UUID;
 public class ProfileServices {
     private final UserRepo userRepo;
 
-    public ProfileResponse helpConverting(User request){
-        return new ProfileResponse(request.getName(),request.getId());
+    public ProfileResponse convetToProfileResponse(User request){
+        return new ProfileResponse(request.getName(),request.getEmail(),request.getUserId());
     }
 
     // create User profile
@@ -30,26 +27,22 @@ public class ProfileServices {
         user.setBirthDate(request.birthDate());
         user.setEmail(request.email());
         User savedUser=userRepo.save(user);
-        return helpConverting(savedUser);
+        return convetToProfileResponse(savedUser);
     }
     // update the user profile
-    public UpdateProfileResponse updateUserProfile(UserUpdateRequest request, long userId){
-        Optional<User> existedUser=checkForUser(userId);
+    public ProfileResponse updateUserProfile(UserUpdateRequest request, Long userId){
+        Optional<User> existedUser=getUserDetailsById(userId);
         User user=existedUser.get();
         user.setEmail(request.email());
-        return new UpdateProfileResponse(user.getName(),user.getEmail(),user.getId());
-    }
-
-    // authenticating user
-    public Optional<User> checkForUser(long userId){
-        Optional<User> existingUser=userRepo.findById(userId);
-        return existingUser;
+        return new ProfileResponse(user.getName(),user.getEmail(),user.getUserId());
     }
 
     // deletetion of user
-    public Optional<?> deleteUser(Long userId){
-        Optional<User> user=userRepo.findById(userId);
+    public Optional<ProfileResponse> deleteUser(Long userId){
+        Optional<User> user=getUserDetailsById(userId);
         userRepo.deleteById(userId);
-        return user;
+        return Optional.of(convetToProfileResponse(user.get()));
     }
+
+    public Optional<User> getUserDetailsById(Long userId) {return userRepo.findById(userId);}
 }

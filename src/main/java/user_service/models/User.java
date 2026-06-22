@@ -21,7 +21,7 @@ public class User {
 //    private UUID userId;
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private Long userId;
     private String name;
     private String email;
     private LocalDate birthDate;
